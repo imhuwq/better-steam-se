@@ -1,0 +1,9 @@
+# For IDEA
+.idea
+
+# For test file
+te.py
+
+# For Python
+*.pyc
+__pycacje__
