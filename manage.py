@@ -15,6 +15,20 @@
 #            }
 #
 
+import sys
+
 from crawl.steam import steam
 
-steam.trigger("game_list", "https://www.baidu.com/")
+try:
+    cmd, *opt = sys.argv[1:]
+except IndexError:
+    cmd, *opt = None, None
+
+
+def trigger(chain, init):
+    steam.trigger(chain, init)
+
+
+if __name__ == "__main__":
+    if cmd == "trigger":
+        trigger(*opt)

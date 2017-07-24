@@ -1,14 +1,28 @@
 # encoding: utf-8
 
 import logging
+from functools import wraps
 
-from .duty import DutyClass, OsheCrawl, OsheParse, OsheStore
+from .duty import OsheCrawl, OsheParse, OsheStore
 
 ChainCreated = type("ChainCreated", (Exception,), dict())
 DutyNotSupported = type("DutyNotSupported", (Exception,), dict())
 DutyRegistered = type("DutyRegistered", (Exception,), dict())
 DutyChainEstablished = type("DutyChainEstablished", (Exception,), dict())
 DutyChainNotEstablished = type("DutyChainNotEstablished", (Exception,), dict())
+
+
+def rename_duty_chain_func(new_name):
+    def wrapper(duty_chain_func):
+        duty_chain_func.__name__ = new_name
+
+        @wraps(duty_chain_func)
+        def inner_wrapper(*args, **kwargs):
+            return duty_chain_func(*args, **kwargs)
+
+        return inner_wrapper
+
+    return wrapper
 
 
 class OsheChain:
@@ -20,22 +34,22 @@ class OsheChain:
         self.store_class = None
         self.duty_chain = None
 
-    def _add_crawl_duty(self, duty_class: OsheCrawl):
+    def _add_crawl_duty(self, duty_class):
         if self.crawl_class is not None:
             raise DutyRegistered("Chain <{0}> has already registered a crawl class".format(self.name))
         self.crawl_class = duty_class
 
-    def _add_parse_duty(self, duty_class: OsheParse):
+    def _add_parse_duty(self, duty_class):
         if self.parse_class is not None:
             raise DutyRegistered("Chain <{0}> has already registered a parse class".format(self.name))
         self.parse_class = duty_class
 
-    def _add_store_duty(self, duty_class: OsheStore):
+    def _add_store_duty(self, duty_class):
         if self.store_class is not None:
             raise DutyRegistered("Chain <{0}> has already registered a store class".format(self.name))
         self.store_class = duty_class
 
-    def add_duty(self, duty_class: DutyClass):
+    def add_duty(self, duty_class):
         if self.duty_chain:
             raise DutyChainEstablished("Duty chain has been established already")
 
@@ -49,14 +63,15 @@ class OsheChain:
             raise DutyNotSupported("{0} is not a supported duty class".format(type(duty_class)))
 
         if all([self.crawl_class, self.parse_class, self.store_class]):
-            @self.app.celery_app.task
-            def _duty_chain_steps(init):
+            @self.app.task
+            @rename_duty_chain_func(self.name)
+            def _duty_chain_func(init):
                 raw = self.crawl_class.run(init)
                 data = self.parse_class.run(raw)
                 report = self.store_class.run(data)
                 logging.info(report)
 
-            self.duty_chain = _duty_chain_steps
+            self.duty_chain = _duty_chain_func
 
     def trigger(self, init):
         if self.duty_chain is None:

@@ -9,15 +9,16 @@ from .chain import OsheChain
 ChainNotFound = type("ChainNotFound", (Exception,), dict())
 
 
-class OsheApp:
-    def __init__(self, name, instance):
+class OsheApp(Celery):
+    def __init__(self, name, *args, **kwargs):
         self.name = name
-        self.instance = instance
+        self.instance = None
         self.chains = dict()
+        super(OsheApp, self).__init__(self.name, *args, **kwargs)
 
-        celery_app = Celery("{0}_celery_app".format(self.name))
-        celery_app.config_from_object(instance)
-        self.celery_app = celery_app
+    def config_from_object(self, instance, silent=False, force=False, namespace=None):
+        self.instance = instance
+        super(OsheApp, self).config_from_object(instance, silent, force, namespace)
 
     def chain(self, chain_name):
         chain = self.chains.get(chain_name, None)
