@@ -38,8 +38,8 @@ class OsheApp(Celery):
 
         return wrapper
 
-    def trigger(self, chain_name, init):
+    def trigger(self, chain_name, init, *args, **kwargs):
         chain = self.chains.get(chain_name, None)
         if chain is None:
             raise ChainNotFound("{0} is not a registered chain".format(chain_name))
-        chain.trigger(init)
+        chain.trigger(init, *args, **kwargs)

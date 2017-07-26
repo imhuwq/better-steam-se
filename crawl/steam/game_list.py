@@ -4,8 +4,7 @@ from . import SteamCrawl, SteamParse, SteamStore
 
 @steam.chain("game_list")
 class GameListCrawl(SteamCrawl):
-    def run(self):
-        pass
+    pass
 
 
 @steam.chain("game_list")

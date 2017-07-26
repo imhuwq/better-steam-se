@@ -4,12 +4,14 @@ import abc
 
 
 class DutyClass(abc.ABC):
+    worker = None
     pass
 
 
 class OsheCrawl(DutyClass):
     headers = None
     cookies = None
+    proxies = None
 
     @classmethod
     @abc.abstractmethod

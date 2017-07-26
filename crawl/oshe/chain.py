@@ -65,15 +65,15 @@ class OsheChain:
         if all([self.crawl_class, self.parse_class, self.store_class]):
             @self.app.task
             @rename_duty_chain_func(self.name)
-            def _duty_chain_func(init):
-                raw = self.crawl_class.run(init)
+            def _duty_chain_func(init, *args, **kwargs):
+                raw = self.crawl_class.run(init, *args, **kwargs)
                 data = self.parse_class.run(raw)
                 report = self.store_class.run(data)
                 logging.info(report)
 
             self.duty_chain = _duty_chain_func
 
-    def trigger(self, init):
+    def trigger(self, init, *args, **kwargs):
         if self.duty_chain is None:
             raise DutyChainNotEstablished("Duty chain cannot be triggered since it has not been established")
-        self.duty_chain.delay(init)
+        self.duty_chain.delay(init, *args, **kwargs)

@@ -13,10 +13,15 @@ services:
 
   celery:
     build: .
+    deploy:
+      replicas: 2
     links:
       - redis
     volumes:
       - .:/data/repo
+    environment:
+     - crawl_worker_http_proxy=172.17.0.1:8123
+     - crawl_worker_https_proxy=172.17.0.1:8123
     command:
       celery -A manage:steam worker -l info
 
