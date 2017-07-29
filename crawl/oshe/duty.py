@@ -4,8 +4,9 @@ import abc
 
 
 class DutyClass(abc.ABC):
+    app = None
+    chain = None
     worker = None
-    pass
 
 
 class OsheCrawl(DutyClass):
@@ -13,33 +14,41 @@ class OsheCrawl(DutyClass):
     cookies = None
     proxies = None
 
-    @classmethod
+    def __init__(self, url):
+        self.url = url
+
     @abc.abstractmethod
-    def run(cls, *args, **kwargs):
+    def run(self):
         """
         所有子类复写该函数以实现该类的具体职责
         """
 
 
 class OsheParse(DutyClass):
-    headers = None
-    cookies = None
+    def __init__(self, raw):
+        self.raw = raw
+        self.html = self.build_html()
+        self.result = dict()
 
-    @classmethod
+    @abc.abstractclassmethod
+    def build_html(self):
+        """
+        所有子类复写该函数以实现从 raw 中构建 html 的过程
+        """
+
     @abc.abstractmethod
-    def run(cls, *args, **kwargs):
+    def run(self):
         """
         所有子类复写该函数以实现该类的具体职责
         """
 
 
 class OsheStore(DutyClass):
-    headers = None
-    cookies = None
+    def __init__(self, data):
+        self.data = data
 
-    @classmethod
     @abc.abstractmethod
-    def run(cls, *args, **kwargs):
+    def run(self):
         """
         所有子类复写该函数以实现该类的具体职责
         """

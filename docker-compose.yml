@@ -9,12 +9,10 @@ services:
     volumes:
       - .:/data/repo
     command:
-      python manage.py trigger game_list "http://store.steampowered.com/search/?page=1"
+      python manage.py trigger game_index "http://store.steampowered.com/search/?sort_by=Released_DESC"
 
   celery:
     build: .
-    deploy:
-      replicas: 2
     links:
       - redis
     volumes:

@@ -2,7 +2,7 @@
 .idea
 
 # For test file
-te.py
+te.*
 
 # For Python
 *.pyc

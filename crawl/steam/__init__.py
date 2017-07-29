@@ -1,5 +1,8 @@
 import os
+import re
+import abc
 import requests
+from lxml import etree
 
 from crawl.oshe import OsheCrawl, OsheParse, OsheStore
 from crawl.oshe import OsheApp
@@ -32,16 +35,30 @@ class SteamCrawl(OsheCrawl):
         "https": os.getenv("crawl_worker_https_proxy", None)
     }
 
+
+class SteamParse(OsheParse):
+    worker = etree
+
     @classmethod
-    def run(cls, url, headers=None, cookies=None, proxies=None):
-        headers = headers or cls.headers
-        cookies = cookies or cls.cookies
-        proxies = proxies or (cls.proxies if cls.proxies.get("http") else None)
-        raw = cls.worker.get(url=url, headers=headers, cookies=cookies, proxies=proxies)
-        return raw.text
+    def strip_strings(cls, strings):
+        result = []
+        pattern = re.compile(r'^([\t\n\s]*)(?P<item>.*?)([\t\n\s]*)$')
+        for item in strings:
+            item = pattern.sub(r'\g<item>', item)
+            result.append(item)
+        return result
+
+    def build_html(self):
+        return self.worker.HTML(self.raw)
+
+    @abc.abstractmethod
+    def run(self):
+        """
+        所有子类复写该函数以实现该类的具体职责
+        """
 
 
-SteamParse = type("SteamParse", (OsheParse,), dict())
 SteamStore = type("SteamStore", (OsheStore,), dict())
 
+from .game_index import *
 from .game_list import *
