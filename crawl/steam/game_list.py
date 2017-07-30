@@ -16,6 +16,7 @@ class GameListParse(SteamParse):
         game_link_list = search_result_div.xpath("a/@href")
         for game_link in game_link_list:
             self.app.trigger("game_detail", game_link)
+        return game_link_list
 
 
 @steam.chain("game_list")

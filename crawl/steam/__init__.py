@@ -1,8 +1,6 @@
 import os
-import re
 import abc
 import requests
-from lxml import etree
 
 from crawl.oshe import OsheCrawl, OsheParse, OsheStore
 from crawl.oshe import OsheApp

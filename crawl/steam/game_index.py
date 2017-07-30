@@ -17,7 +17,7 @@ class GameIndexParse(SteamParse):
         last_page = int(last_page)
         for page_index in range(1, last_page + 1):
             self.app.trigger("game_list", "{0}&page={1}".format(self.chain.init, page_index))
-
+        return last_page
 
 @steam.chain("game_index")
 class GameIndexStore(SteamStore):

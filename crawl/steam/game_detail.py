@@ -17,22 +17,65 @@ class GameDetailCrawl(SteamCrawl):
 @steam.chain("game_detail")
 class GameDetailParse(SteamParse):
     def parse_appid(self):
-        pass
+        url = self.chain.init
+        appid = re.findall("http://.*?/app/(.*?)/.*?", url, re.DOTALL)
+        self.result["appid"] = appid
 
     def parse_tags(self):
-        pass
+        tags_div = self.html.xpath("//div[@class='glance_tags popular_tags']")[0]
+        tags = tags_div.xpath("a/text()")
+        tags = SteamParse.strip_strings(tags)
+        self.result["tags"] = tags
 
     def parse_features(self):
-        pass
+        features = self.html.xpath("//div[@class='game_area_details_specs']/a/text()")
+        self.result["features"] = features
 
     def parse_languages(self):
-        pass
+        languages = dict()
+        language_options = self.html.xpath("//table[@class='game_language_options']/tr")[1:]
+        for language_option in language_options:
+            options = language_option.xpath("td")
+            language = SteamParse.strip_strings(options[0].xpath("text()"))[0]
+            ui = options[1].xpath("img") != []
+            audio = options[2].xpath("img") != []
+            dialog = options[3].xpath("img") != []
 
-    def parse_requirements(self):
-        pass
+            languages[language] = {
+                "UI": ui,
+                "Audio": audio,
+                "Dialog": dialog
+            }
+
+        self.result["languages"] = languages
+
+    def parse_os(self):
+        os_div = self.html.xpath("//div[@class='sysreq_tabs']")[0]
+        win = os_div.xpath("div[@data-os='win']") != []
+        mac = os_div.xpath("div[@data-os='mac']") != []
+        linux = os_div.xpath("div[@data-os='linux']") != []
+
+        self.result["os"] = {
+            "win": win,
+            "mac": mac,
+            "linux": linux
+        }
 
     def parse_comments(self):
-        pass
+        def convert_count(count_num_str):
+            if count_num_str:
+                return int(re.sub(r"[,()]", "", count_num_str, re.DOTALL))
+            return 0
+
+        comment_filter_div = self.html.xpath("//div[@class='user_reviews_filter_section']")[0]
+        counts = comment_filter_div.xpath("label/span[@class='user_reviews_count']/text()")
+        counts = map(convert_count, counts)
+        all_counts, positive_counts, negative_counts = counts
+        self.result["comments"] = {
+            "all": all_counts,
+            "positive": positive_counts,
+            "negative": negative_counts
+        }
 
     def parse_details(self):
         detail_block = self.html.xpath("//div[@class='details_block']")[0]
@@ -74,8 +117,10 @@ class GameDetailParse(SteamParse):
         self.parse_details()
         self.parse_features()
         self.parse_languages()
-        self.parse_requirements()
+        self.parse_os()
         self.parse_comments()
+
+        return self.result
 
 
 @steam.chain("game_detail")
