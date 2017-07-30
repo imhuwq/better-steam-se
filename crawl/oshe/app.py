@@ -23,7 +23,7 @@ class OsheApp(Celery):
     def config_from_object(self, instance, silent=False, force=False, namespace=None):
         self.instance = instance
 
-        logs_dir = getattr(instance, "logs_dir", "/tmp/logs/{0}".format(self.name))
+        logs_dir = getattr(instance, "crawl_logs_dir", "/data/logs/{0}/crawl".format(self.name))
         os.makedirs(logs_dir, mode=0o777, exist_ok=True)
         self.logs_dir = logs_dir
 

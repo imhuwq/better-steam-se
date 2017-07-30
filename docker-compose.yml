@@ -8,6 +8,7 @@ services:
       - celery
     volumes:
       - .:/data/repo
+      - /share/logs:/data/logs
     command:
       python manage.py trigger game_index "http://store.steampowered.com/search/?sort_by=Released_DESC"
 
@@ -17,6 +18,7 @@ services:
       - redis
     volumes:
       - .:/data/repo
+      - /share/logs:/data/logs
     environment:
      - crawl_worker_http_proxy=172.17.0.1:8123
      - crawl_worker_https_proxy=172.17.0.1:8123

@@ -9,4 +9,4 @@ te.py
 
 # For Python
 *.pyc
-__pycacje__
+__pycache__

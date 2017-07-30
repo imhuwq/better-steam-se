@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 import os
-import logging
 from datetime import datetime
 from functools import wraps
 
@@ -46,17 +45,15 @@ class OsheChain:
     def log_std(self, message):
         with open(self.std_log, "a") as f:
             f.write(message)
-        logging.info(message)
 
     def log_err(self, message):
         with open(self.err_log, "a") as f:
             f.write(message)
-        logging.warning(message)
 
     def auto_log_duty_chain(self, duty_chain):
         @wraps(duty_chain)
         def wrapper(*args, **kwargs):
-            message = "\n[{0}] {1}: \n\targs: {2}\n\tkwargs: {3}".format(datetime.now(), self.name, args, kwargs)
+            message = "[{0}] {1}: \n\targs: {2}\n\tkwargs: {3}\n".format(datetime.now(), self.name, args, kwargs)
             try:
                 duty_chain(*args, **kwargs)
             except Exception as err:

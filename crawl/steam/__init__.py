@@ -62,3 +62,4 @@ SteamStore = type("SteamStore", (OsheStore,), dict())
 
 from .game_index import *
 from .game_list import *
+from .game_detail import *

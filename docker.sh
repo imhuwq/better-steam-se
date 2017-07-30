@@ -20,6 +20,7 @@ elif [ "$1" == "pip" ]; then
     docker rm -f better-steam-se
     docker run --volume $PWD:/data/repo \
                     --name better-steam-se \
+                    --user root
                     imhuwq/better-steam-se /bin/bash -c "$cmd"
 
     docker build -t imhuwq/better-steam-se .
