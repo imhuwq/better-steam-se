@@ -10,7 +10,7 @@ services:
       - .:/data/repo
       - /share/logs:/data/logs
     command:
-      python manage.py trigger game_index "http://store.steampowered.com/search/?sort_by=Released_DESC"
+      python manage.py trigger game_index "http://store.steampowered.com/search/?category1=998&sort_by=Released_DESC"
 
   celery:
     build: .

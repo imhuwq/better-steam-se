@@ -1,6 +1,8 @@
 # encoding: utf-8
 
 import os
+import logging
+import traceback
 from datetime import datetime
 from functools import wraps
 
@@ -35,28 +37,36 @@ class OsheChain:
         self.store_class = None
         self.duty_chain = None
 
+        self.running = True
+
         self.init = None
         self.raw = None
         self.data = None
 
-        self.std_log = os.path.join(self.app.logs_dir, self.name + "_std.log")
-        self.err_log = os.path.join(self.app.logs_dir, self.name + "_err.log")
+        self.std_log = logging.getLogger(self.name + "_std")
+        self.std_log.setLevel(logging.INFO)
+        std_log_file = os.path.join(self.app.logs_dir, self.name + "_std.log")
+        self.std_log.addHandler(logging.FileHandler(std_log_file))
+
+        self.err_log = logging.getLogger(self.name + "_err")
+        self.err_log.setLevel(logging.ERROR)
+        err_log_file = os.path.join(self.app.logs_dir, self.name + "_err.log")
+        self.err_log.addHandler(logging.FileHandler(err_log_file))
 
     def log_std(self, message):
-        with open(self.std_log, "a") as f:
-            f.write(message)
+        self.std_log.info(message)
 
     def log_err(self, message):
-        with open(self.err_log, "a") as f:
-            f.write(message)
+        self.err_log.error(message)
 
     def auto_log_duty_chain(self, duty_chain):
         @wraps(duty_chain)
         def wrapper(*args, **kwargs):
-            message = "[{0}] {1}: \n\targs: {2}\n\tkwargs: {3}\n".format(datetime.now(), self.name, args, kwargs)
+            message = "[{0}] {1}: \nargs: {2}\nkwargs: {3}\n".format(datetime.now(), self.name, args, kwargs)
             try:
                 duty_chain(*args, **kwargs)
             except Exception as err:
+                message = "{0}\n{1}\n".format(message, traceback.format_exc())
                 self.log_err(message)
                 raise err
             else:
@@ -71,9 +81,12 @@ class OsheChain:
             @self.auto_log_duty_chain
             def _duty_chain_func(init):
                 self.init = init
-                self.raw = self.crawl_class(init).run()
-                self.data = self.parse_class(self.raw).run()
-                self.store_class(self.data).run()
+                if self.running:
+                    self.raw = self.crawl_class(init).run()
+                if self.running:
+                    self.data = self.parse_class(self.raw).run()
+                if self.running:
+                    self.store_class(self.data).run()
 
             self.duty_chain = _duty_chain_func
 

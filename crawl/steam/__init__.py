@@ -18,12 +18,12 @@ class SteamCrawl(OsheCrawl):
                              'AppleWebKit/537.36 (KHTML, like Gecko) '
                              'Chrome/55.0.2883.75 Safari/537.36',
                'host': 'store.steampowered.com',
-               'connection': 'keep-alive'
+               'connection': 'keep-alive',
+               'accept-language': 'zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4'
                }
 
     cookies = {'birthtime': '667753201',
                'lastagecheckage': '1-March-1991',
-               'Steam_Language': 'english',
                'steamCountry': 'CN',
                'mature_content': '1'
                }
@@ -35,6 +35,7 @@ class SteamCrawl(OsheCrawl):
 
 
 class SteamParse(OsheParse):
+    from lxml import etree
     worker = etree
 
     @classmethod
